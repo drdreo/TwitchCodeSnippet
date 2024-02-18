@@ -1,17 +1,19 @@
 package main
 
 import (
-	"flag"
+    "encoding/json"
+    "flag"
+    "fmt"
+    "github.com/gorilla/websocket"
     "log"
     "net/http"
-    "github.com/gorilla/websocket"
+    "time"
 )
 
 type CodeSnippet struct {
-    Code     string `json:"code"`
-    User     string `json:"user"`
+    Code string `json:"code"`
+    User string `json:"user"`
 }
-
 
 var upgrader = websocket.Upgrader{
     CheckOrigin: func(r *http.Request) bool {
@@ -21,6 +23,8 @@ var upgrader = websocket.Upgrader{
 
 var addr = flag.String("addr", "localhost:8088", "http service address")
 
+var manager = NewConnectionManager()
+
 func handleConnections(w http.ResponseWriter, r *http.Request) {
     ws, err := upgrader.Upgrade(w, r, nil)
     if err != nil {
@@ -29,21 +33,80 @@ func handleConnections(w http.ResponseWriter, r *http.Request) {
     }
     defer ws.Close()
 
-    // Mock code snippet
-    codeSnippet := `{ "code": "fmt.Println(\"Hello, Twitch!\")", "user": "DrDreo" }`
+    fmt.Println("handling connections")
 
-    // Send the mock code snippet to the connected WebSocket client (JetBrains plugin)
-    if err := ws.WriteMessage(websocket.TextMessage, []byte(codeSnippet)); err != nil {
-        log.Println("write error:", err)
+    manager.AddConnection(ws)
+
+    // Define a slice of code snippets to simulate changes.
+    test := `
+const test = 123;
+test++;
+if (test === 123){
+    exit();
+}
+
+`
+    codeSnippets := []CodeSnippet{
+        {Code: "fmt.Println(\"Hello, Twitch!\")", User: "DrDreo"},
+        {Code: "let me go", User: "DrDreo"},
+        {Code: test, User: "DrDreo"},
+    }
+
+    // Iterate through code snippets and send them at 2-second intervals.
+    for _, snippet := range codeSnippets {
+        // Serialize the CodeSnippet struct to JSON.
+        snippetJSON, err := json.Marshal(snippet)
+        if err != nil {
+            log.Println("json marshal error:", err)
+            continue
+        }
+
+        if err := ws.WriteMessage(websocket.TextMessage, snippetJSON); err != nil {
+            log.Println("write error:", err)
+            continue
+        }
+
+        time.Sleep(2 * time.Second)
+    }
+
+    // Keep the connection alive (e.g., read messages in a loop)
+    for {
+        if _, _, err := ws.ReadMessage(); err != nil {
+            log.Println("read error:", err)
+            break
+        }
     }
 }
 
 func main() {
-	flag.Parse()
-	log.SetFlags(0)
+    flag.Parse()
+    log.SetFlags(0)
+
+    http.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
+        http.Error(w, "Index not configured", http.StatusNotFound)
+    })
 
     http.HandleFunc("/ws", handleConnections)
+    http.HandleFunc("POST /suggestion", hangleSuggestion)
 
-    log.Printf("Server starting on %s", *addr)
-   	log.Fatal(http.ListenAndServe(*addr, nil))
+    log.Printf("Servers starting on %s", *addr)
+    log.Fatal(http.ListenAndServe(*addr, nil))
+
+}
+
+func hangleSuggestion(w http.ResponseWriter, req *http.Request) {
+    log.Printf("handling suggestion %s\n", req.URL.Path)
+
+    if req.Method != http.MethodPost {
+        http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+        return
+    }
+
+    var snippet CodeSnippet
+    if err := json.NewDecoder(req.Body).Decode(&snippet); err != nil {
+        http.Error(w, "Bad request", http.StatusBadRequest)
+        return
+    }
+
+    manager.SendCodeSnippet(snippet)
 }
