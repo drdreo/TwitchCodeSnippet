@@ -2,7 +2,7 @@
   "name": "tcs-twitch-extension",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "projectType": "application",
-  "prefix": "twitch-code-suggestion",
+  "prefix": "",
   "sourceRoot": "apps/tcs-twitch-extension/src",
   "tags": [],
   "targets": {
@@ -11,7 +11,7 @@
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/apps/tcs-twitch-extension",
-        "index": "apps/tcs-twitch-extension/src/index.html",
+        "index": "apps/tcs-twitch-extension/src/video_component.html",
         "browser": "apps/tcs-twitch-extension/src/main.ts",
         "polyfills": ["zone.js"],
         "tsConfig": "apps/tcs-twitch-extension/tsconfig.app.json",

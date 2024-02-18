@@ -82,9 +82,8 @@ func main() {
     flag.Parse()
     log.SetFlags(0)
 
-    http.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
-        http.Error(w, "Index not configured", http.StatusNotFound)
-    })
+    fs := http.FileServer(http.Dir("./src/assets"))
+    http.Handle("/", fs)
 
     http.HandleFunc("/ws", handleConnections)
     http.HandleFunc("POST /suggestion", hangleSuggestion)
