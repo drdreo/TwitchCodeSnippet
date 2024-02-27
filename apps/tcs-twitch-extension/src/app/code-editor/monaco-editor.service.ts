@@ -29,7 +29,7 @@ export class MonacoEditorService {
     }
 
     load() {
-        if (typeof monaco === 'object') {
+        if (typeof monaco !== 'undefined') {
             this.finishLoading();
             return;
         }
