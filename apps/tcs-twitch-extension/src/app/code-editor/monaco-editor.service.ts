@@ -1,48 +1,47 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
+import type * as monacoType from 'monaco-editor';
+
+declare const require: any;
+declare const monaco: any;
 
 @Injectable({
     providedIn: 'root',
 })
 export class MonacoEditorService {
-    loaded = false;
-
+    private editorInstance?: monacoType.editor.IStandaloneCodeEditor;
     public loadingFinished: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
 
     constructor() {}
 
-    private finishLoading() {
-        this.loaded = true;
-        this.loadingFinished.next(true);
+    createEditor(host: HTMLElement) {
+        this.editorInstance = monaco.editor.create(host, {
+            value: ['function x() {', '\tconsole.log("Hello world!");', '}'].join('\n'),
+            language: 'typescript',
+
+            theme: 'vs-dark',
+            fontFamily: 'JetBrains Mono',
+            automaticLayout: true,
+            cursorBlinking: 'smooth',
+
+            unusualLineTerminators: 'auto',
+        });
     }
 
-    public load() {
-        // load the assets
-
-        const baseUrl = './assets' + '/monaco-editor/min/vs';
-
-        if (typeof (<any>window).monaco === 'object') {
+    load() {
+        if (typeof monaco === 'object') {
             this.finishLoading();
             return;
         }
 
-        const onGotAmdLoader: any = () => {
-            // load Monaco
-            (<any>window).require.config({ paths: { vs: `${baseUrl}` } });
-            (<any>window).require([`vs/editor/editor.main`], () => {
-                this.finishLoading();
-            });
-        };
+        // require is provided by loader.min.js.
+        require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.26.1/min/vs' } });
+        require(['vs/editor/editor.main'], () => {
+            this.finishLoading();
+        });
+    }
 
-        // load AMD loader, if necessary
-        if (!(<any>window).require) {
-            const loaderScript: HTMLScriptElement = document.createElement('script');
-            loaderScript.type = 'text/javascript';
-            loaderScript.src = `${baseUrl}/loader.js`;
-            loaderScript.addEventListener('load', onGotAmdLoader);
-            document.body.appendChild(loaderScript);
-        } else {
-            onGotAmdLoader();
-        }
+    private finishLoading() {
+        this.loadingFinished.next(true);
     }
 }

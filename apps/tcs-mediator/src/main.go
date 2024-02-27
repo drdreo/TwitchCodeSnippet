@@ -2,6 +2,7 @@ package main
 
 import (
     "encoding/json"
+    "os"
     "flag"
     "fmt"
     "github.com/gorilla/websocket"
@@ -78,19 +79,41 @@ if (test === 123){
     }
 }
 
+func checkDir(dir string) {
+    _, err := os.ReadDir(dir)
+    if err != nil {
+        log.Fatalf("Error reading directory: %s", err)
+    }
+    //    log.Printf("Files in directory %s:\n", dir)
+    //    for _, file := range files {
+    //        log.Println(file.Name())
+    //    }
+}
+
 func main() {
     flag.Parse()
     log.SetFlags(0)
 
+    checkDir("./src/assets")
     fs := http.FileServer(http.Dir("./src/assets"))
-    http.Handle("/", fs)
+    //     http.Handle("/", fs)
+    http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+        log.Printf("%s %s %s\n", r.RemoteAddr, r.Method, r.URL)
+        fs.ServeHTTP(w, r)
+    })
+    //
+    //    http.HandleFunc("/panel.html", func(w http.ResponseWriter, r *http.Request) {
+    //        log.Printf("dick\n")
+    //        fs := http.FileServer(http.Dir("./src/assets/index.html"))
+    //
+    //        fs.ServeHTTP(w, r)
+    //    })
 
     http.HandleFunc("/ws", handleConnections)
     http.HandleFunc("POST /suggestion", handleSuggestion)
 
-    log.Printf("Servers starting on %s", *addr)
+    log.Printf("TCS Mediator starting on %s", *addr)
     log.Fatal(http.ListenAndServe(*addr, nil))
-
 }
 
 func handleSuggestion(w http.ResponseWriter, req *http.Request) {
