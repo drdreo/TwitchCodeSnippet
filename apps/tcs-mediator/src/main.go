@@ -86,14 +86,14 @@ func main() {
     http.Handle("/", fs)
 
     http.HandleFunc("/ws", handleConnections)
-    http.HandleFunc("POST /suggestion", hangleSuggestion)
+    http.HandleFunc("POST /suggestion", handleSuggestion)
 
     log.Printf("Servers starting on %s", *addr)
     log.Fatal(http.ListenAndServe(*addr, nil))
 
 }
 
-func hangleSuggestion(w http.ResponseWriter, req *http.Request) {
+func handleSuggestion(w http.ResponseWriter, req *http.Request) {
     log.Printf("handling suggestion %s\n", req.URL.Path)
 
     if req.Method != http.MethodPost {

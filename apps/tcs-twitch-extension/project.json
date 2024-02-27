@@ -11,20 +11,29 @@
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/apps/tcs-twitch-extension",
-        "index": "apps/tcs-twitch-extension/src/video_component.html",
+        "index": "apps/tcs-twitch-extension/src/index.html",
         "browser": "apps/tcs-twitch-extension/src/main.ts",
         "polyfills": ["zone.js"],
         "tsConfig": "apps/tcs-twitch-extension/tsconfig.app.json",
         "inlineStyleLanguage": "scss",
         "assets": [
           "apps/tcs-twitch-extension/src/favicon.ico",
-          "apps/tcs-twitch-extension/src/assets"
+          "apps/tcs-twitch-extension/src/assets",
+          {
+            "glob": "**/*",
+            "input": "node_modules/monaco-editor",
+            "output": "assets/monaco-editor"
+          }
         ],
         "styles": ["apps/tcs-twitch-extension/src/styles.scss"],
         "scripts": []
       },
       "configurations": {
         "production": {
+          "index": {
+            "input": "apps/tcs-twitch-extension/src/index.html",
+            "output": "panel.html"
+          },
           "budgets": [
             {
               "type": "initial",
