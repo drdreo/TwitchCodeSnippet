@@ -5,13 +5,8 @@ interface SubscriptionStatus {
 interface Window {
     Twitch: {
         ext: {
-            onAuthorized(auth: {
-                channelId: string;
-                clientId: string;
-                userId: string;
-                token: string;
-                helixToken: string;
-            });
+            onAuthorized: (callback: (auth: TwitchAuthorized) => void) => void;
+            onContext: (callback: (context: any) => void) => void;
             viewer: {
                 opaqueId: string;
                 helixToken: string;
@@ -20,7 +15,7 @@ interface Window {
                 role: string;
                 id: string | null;
                 isLinked: boolean;
-                onChanged(callback: () => {});
+                onChanged: (callback: () => void) => void;
             };
         };
     };

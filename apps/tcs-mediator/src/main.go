@@ -80,14 +80,14 @@ if (test === 123){
 }
 
 func checkDir(dir string) {
-    _, err := os.ReadDir(dir)
+    files, err := os.ReadDir(dir)
     if err != nil {
         log.Fatalf("Error reading directory: %s", err)
     }
-    //    log.Printf("Files in directory %s:\n", dir)
-    //    for _, file := range files {
-    //        log.Println(file.Name())
-    //    }
+    log.Printf("Files in directory %s:\n", dir)
+    for _, file := range files {
+        log.Println(file.Name())
+    }
 }
 
 func main() {
@@ -95,8 +95,8 @@ func main() {
     log.SetFlags(0)
 
     // JUST FOR DEVING PURPOSE
-    checkDir("./src/assets")
-    fs := http.FileServer(http.Dir("./src/assets"))
+    checkDir("../../dist/apps/tcs-twitch-extension/browser")
+    fs := http.FileServer(http.Dir("../../dist/apps/tcs-twitch-extension/browser"))
     //     http.Handle("/", fs)
     http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
         log.Printf("%s %s %s\n", r.RemoteAddr, r.Method, r.URL)
