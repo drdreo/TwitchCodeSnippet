@@ -12,8 +12,8 @@ import (
 )
 
 type CodeSnippet struct {
-    Code string `json:"code"`
-    User string `json:"user"`
+    Code     string `json:"code"`
+    TwitchId string `json:"twitchId"`
 }
 
 var upgrader = websocket.Upgrader{
@@ -48,9 +48,9 @@ if (test === 123){
 
 `
     codeSnippets := []CodeSnippet{
-        {Code: "fmt.Println(\"Hello, Twitch!\")", User: "DrDreo"},
-        {Code: "let me go", User: "DrDreo"},
-        {Code: test, User: "DrDreo"},
+        {Code: "fmt.Println(\"Hello, Twitch!\")", TwitchId: "DrDreo"},
+        {Code: "let me go", TwitchId: "DrDreo"},
+        {Code: test, TwitchId: "DrDreo"},
     }
 
     // Iterate through code snippets and send them at 2-second intervals.
@@ -94,6 +94,7 @@ func main() {
     flag.Parse()
     log.SetFlags(0)
 
+    // JUST FOR DEVING PURPOSE
     checkDir("./src/assets")
     fs := http.FileServer(http.Dir("./src/assets"))
     //     http.Handle("/", fs)
@@ -101,16 +102,10 @@ func main() {
         log.Printf("%s %s %s\n", r.RemoteAddr, r.Method, r.URL)
         fs.ServeHTTP(w, r)
     })
-    //
-    //    http.HandleFunc("/panel.html", func(w http.ResponseWriter, r *http.Request) {
-    //        log.Printf("dick\n")
-    //        fs := http.FileServer(http.Dir("./src/assets/index.html"))
-    //
-    //        fs.ServeHTTP(w, r)
-    //    })
 
     http.HandleFunc("/ws", handleConnections)
     http.HandleFunc("POST /suggestion", handleSuggestion)
+    http.HandleFunc("OPTIONS /suggestion", enableCors)
 
     log.Printf("TCS Mediator starting on %s", *addr)
     log.Fatal(http.ListenAndServe(*addr, nil))
@@ -118,6 +113,7 @@ func main() {
 
 func handleSuggestion(w http.ResponseWriter, req *http.Request) {
     log.Printf("handling suggestion %s\n", req.URL.Path)
+    enableCors(w, req)
 
     if req.Method != http.MethodPost {
         http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -131,4 +127,10 @@ func handleSuggestion(w http.ResponseWriter, req *http.Request) {
     }
 
     manager.SendCodeSnippet(snippet)
+}
+
+func enableCors(w http.ResponseWriter, req *http.Request) {
+    (w).Header().Set("Access-Control-Allow-Origin", "*")
+    (w).Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+    (w).Header().Set("Access-Control-Allow-Headers", "Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With")
 }

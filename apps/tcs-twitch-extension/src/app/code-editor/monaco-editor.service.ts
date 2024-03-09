@@ -1,5 +1,4 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { Injectable, signal } from '@angular/core';
 import type * as monacoType from 'monaco-editor';
 
 declare const require: any;
@@ -9,14 +8,14 @@ declare const monaco: any;
     providedIn: 'root',
 })
 export class MonacoEditorService {
+    loadingFinished = signal(false);
     private editorInstance?: monacoType.editor.IStandaloneCodeEditor;
-    public loadingFinished: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
 
     constructor() {}
 
     createEditor(host: HTMLElement) {
         this.editorInstance = monaco.editor.create(host, {
-            value: ['function x() {', '\tconsole.log("Hello world!");', '}'].join('\n'),
+            value: ['function x() {', '\tconsole.log("Backseat here we go!");', '}'].join('\n'),
             language: 'typescript',
 
             theme: 'vs-dark',
@@ -41,7 +40,14 @@ export class MonacoEditorService {
         });
     }
 
+    getContent(): string {
+        if (!this.editorInstance) {
+            throw new Error('Trying to get editor content, but editor is not initialized yet');
+        }
+        return this.editorInstance.getValue();
+    }
+
     private finishLoading() {
-        this.loadingFinished.next(true);
+        this.loadingFinished.set(true);
     }
 }

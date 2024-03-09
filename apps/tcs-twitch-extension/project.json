@@ -8,25 +8,16 @@
     "targets": {
         "build": {
             "executor": "@angular-devkit/build-angular:application",
-            "outputs": [
-                "{options.outputPath}"
-            ],
+            "outputs": ["{options.outputPath}"],
             "options": {
                 "outputPath": "dist/apps/tcs-twitch-extension",
                 "index": "apps/tcs-twitch-extension/src/index.html",
                 "browser": "apps/tcs-twitch-extension/src/main.ts",
-                "polyfills": [
-                    "zone.js"
-                ],
+                "polyfills": ["zone.js"],
                 "tsConfig": "apps/tcs-twitch-extension/tsconfig.app.json",
                 "inlineStyleLanguage": "scss",
-                "assets": [
-                    "apps/tcs-twitch-extension/src/favicon.ico",
-                    "apps/tcs-twitch-extension/src/assets"
-                ],
-                "styles": [
-                    "apps/tcs-twitch-extension/src/styles.scss"
-                ],
+                "assets": ["apps/tcs-twitch-extension/src/favicon.ico", "apps/tcs-twitch-extension/src/assets"],
+                "styles": ["apps/tcs-twitch-extension/src/styles.scss"],
                 "scripts": []
             },
             "configurations": {
